@@ -137,6 +137,12 @@ main{padding-block:12px 128px;display:flex;flex-direction:column;gap:11px}
 .ah-s{font-size:11px;color:rgba(255,255,255,.45);margin-top:9px;line-height:1.45}
 
 /* movimientos */
+.dt-top{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:2px 0 14px;border-bottom:1px solid var(--hair);margin-bottom:4px}
+.dt-top .pt{margin-bottom:6px}
+.dt-v{font-family:var(--f-d);font-weight:700;font-size:27px;letter-spacing:-.02em;line-height:1.1}
+.dt-s{font-size:11.5px;color:var(--ink3)}
+.dt-sec{margin:16px 0 6px}
+.dt-lista{margin-top:2px}
 .dia{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--hair);width:100%}
 .dia:last-child{border-bottom:none;padding-bottom:0}
 .dia .b{flex:1;min-width:0}
@@ -332,6 +338,13 @@ main{padding-block:12px 128px;display:flex;flex-direction:column;gap:11px}
   <div class="grab"></div>
   <div class="sh"><button class="x" id="catX">&#10005;</button><h2 id="catTit">Categoría</h2></div>
   <div id="catLista"></div>
+</div></div>
+
+<!-- hoja detalle de un rubro -->
+<div class="sheet" id="shRub" hidden><div class="sheet-in">
+  <div class="grab"></div>
+  <div class="sh"><button class="x" id="rubX">&#10005;</button><h2 id="rubTit">Rubro</h2></div>
+  <div id="rubCont"></div>
 </div></div>
 
 <!-- hoja opciones simples -->

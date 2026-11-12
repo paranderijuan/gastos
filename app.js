@@ -133,13 +133,13 @@ window.addEventListener("online",function(){if(pend)sincronizar();});
 /* ===================== cálculos ===================== */
 function movMes(ym){return D.mov.filter(function(x){return ymDe(x.fecha)===ym;});}
 function totales(ym){
-  var i=0,g=0,a=0;
+  var i=0,g=0,a=0,f=0;
   movMes(ym).forEach(function(x){
     if(x.t==="i") i+=x.monto;
-    else if(x.t==="g") g+=x.monto;
+    else if(x.t==="g"){ g+=x.monto; if(x.pago==="fiado") f+=x.monto; }
     else if(x.t==="a") a+=(x.sub==="Saqué"? -x.monto : x.monto);
   });
-  return {ing:i,gas:g,aho:a,queda:i-g-a};
+  return {ing:i,gas:g,aho:a,fia:f,queda:i-(g-f)-a};
 }
 function ahorroTotal(){
   var t=0;
@@ -268,6 +268,13 @@ function pInicio(){
      + '<span class="b"><span class="n">Cargar el salario de '+esc(MESES[+mes.split("-")[1]-1])+'</span>'
      + '<span class="s">'+esc(gs(D.salario))+'</span></span><span class="cv">›</span></span></button>';
   }
+  if(t.fia>0){
+    b+='<button class="card" data-pg="fiado" style="width:100%;padding:12px 14px"><span class="ban">'
+     + '<span class="ico" style="background:var(--warn-bg);color:var(--warn)">₲</span>'
+     + '<span class="b"><span class="n">Fiado · debés '+esc(fmt(t.fia))+'</span>'
+     + '<span class="s">no se descuenta de lo que te queda, sale de tu próximo cobro</span></span>'
+     + '<span class="cv">›</span></span></button>';
+  }
   if(dias>0&&t.queda>0){
     b+='<div class="card" style="padding:12px 14px"><div class="ban">'
      + '<span class="ico" style="background:var(--soft);color:var(--brand)">₲</span>'
@@ -281,7 +288,7 @@ function pInicio(){
      + '<button class="mas" data-ir="mov">ver todo ›</button></div>';
     pg.lista.slice(0,6).forEach(function(c){
       var pp=c.pre>0?c.gas/c.pre:0;
-      b+='<button class="ru" data-gr="'+esc(c.id)+'"><i class="pt" style="background:var('+c.col+')"></i>'
+      b+='<button class="ru" data-ru="'+esc(c.id)+'"><i class="pt" style="background:var('+c.col+')"></i>'
        + '<span class="nm">'+esc(c.nom)+'</span><span class="vl num">'+esc(fmt(c.gas))+'</span>'
        + '<span class="pc num">'+Math.round(c.pct*100)+'%</span></button>'
        + '<div class="tr"><i style="width:'+Math.min(100,(c.pre>0?pp:c.pct)*100).toFixed(1)+'%;background:var('+(c.pre>0&&pp>=1?"--bad":c.col)+')"></i></div>'
@@ -385,10 +392,12 @@ function pInf(){
 
   var pg=porGrupo(mes);
   if(pg.total>0){
-    b+='<div class="card"><div class="ch"><span class="k">Rubros de '+esc(MESES[+mes.split("-")[1]-1])+'</span></div>';
+    b+='<div class="card"><div class="ch"><span class="k">Rubros de '+esc(MESES[+mes.split("-")[1]-1])+'</span>'
+     + '<span class="mas" style="font-size:10.5px;color:var(--ink3)">tocá para ver</span></div>';
     pg.lista.forEach(function(c){
-      b+='<div class="ru"><i class="pt" style="background:var('+c.col+')"></i><span class="nm">'+esc(c.nom)+'</span>'
-       + '<span class="vl num">'+esc(fmt(c.gas))+'</span><span class="pc num">'+Math.round(c.pct*100)+'%</span></div>'
+      b+='<button class="ru" data-ru="'+esc(c.id)+'"><i class="pt" style="background:var('+c.col+')"></i><span class="nm">'+esc(c.nom)+'</span>'
+       + '<span class="vl num">'+esc(fmt(c.gas))+'</span><span class="pc num">'+Math.round(c.pct*100)+'%</span>'
+       + '<span class="cv" style="margin-left:2px">›</span></button>'
        + '<div class="tr"><i style="width:'+(c.pct*100).toFixed(1)+'%;background:var('+c.col+')"></i></div>';
     });
     b+='</div>';
@@ -396,10 +405,12 @@ function pInf(){
 
   var pp=porPago(mes);
   if(pp.length){
-    b+='<div class="card"><div class="ch"><span class="k">Cómo pagaste</span></div>';
+    b+='<div class="card"><div class="ch"><span class="k">Cómo pagaste</span>'
+     + '<span class="mas" style="font-size:10.5px;color:var(--ink3)">tocá para ver</span></div>';
     pp.forEach(function(c){
-      b+='<div class="ru"><i class="pt" style="background:var('+c.col+')"></i><span class="nm">'+esc(c.nom)+'</span>'
-       + '<span class="vl num">'+esc(fmt(c.gas))+'</span><span class="pc num">'+Math.round(c.pct*100)+'%</span></div>'
+      b+='<button class="ru" data-pg="'+esc(c.id)+'"><i class="pt" style="background:var('+c.col+')"></i><span class="nm">'+esc(c.nom)+'</span>'
+       + '<span class="vl num">'+esc(fmt(c.gas))+'</span><span class="pc num">'+Math.round(c.pct*100)+'%</span>'
+       + '<span class="cv" style="margin-left:2px">›</span></button>'
        + '<div class="tr"><i style="width:'+(c.pct*100).toFixed(1)+'%;background:var('+c.col+')"></i></div>';
     });
     b+='</div>';
@@ -407,6 +418,75 @@ function pInf(){
   if(!b) b='<div class="card"><div class="vacio"><b>Sin datos todavía</b>Cargá algunos movimientos y acá vas a ver los gráficos.</div></div>';
   $("vista").innerHTML=b;
 }
+
+var COLP={efectivo:"--g2",tarjeta:"--g1",transferencia:"--g6",fiado:"--g3"};
+function nomPago(id){var n="Efectivo";PAGOS.forEach(function(p){if(p.id===id)n=p.n;});return n;}
+var detTipo="gr", detClave="";
+function abrirDet(tipo,clave){ detTipo=tipo; detClave=clave; pintarDet(); $("shRub").hidden=false; }
+function pintarDet(){
+  var lista=movMes(mes).filter(function(x){
+    if(x.t!=="g") return false;
+    return detTipo==="gr" ? x.gr===detClave : (x.pago||"efectivo")===detClave;
+  });
+  var col = detTipo==="gr" ? (grupo(detClave)?grupo(detClave).col:"--g8") : (COLP[detClave]||"--g8");
+  $("rubTit").textContent = detTipo==="gr" ? nomG(detClave) : nomPago(detClave);
+  var tot=0; lista.forEach(function(x){tot+=x.monto;});
+  var h='<div class="dt-top"><i class="pt" style="background:var('+col+')"></i>'
+   + '<span class="dt-v num">'+esc(gs(tot))+'</span>'
+   + '<span class="dt-s">'+lista.length+(lista.length===1?' movimiento en ':' movimientos en ')+esc(MESES[+mes.split("-")[1]-1])+'</span></div>';
+  if(!lista.length){
+    h+='<div class="vacio"><b>Nada por acá</b>No hay gastos de este tipo en el mes.</div>';
+    $("rubCont").innerHTML=h; return;
+  }
+  var ms={},ord=[];
+  lista.forEach(function(x){
+    var k = detTipo==="gr" ? (x.sub||"Sin detalle") : nomG(x.gr);
+    if(ms[k]===undefined){ms[k]=0;ord.push(k);}
+    ms[k]+=x.monto;
+  });
+  ord.sort(function(a,b){return ms[b]-ms[a];});
+  h+='<div class="dt-sec"><span class="k">'+(detTipo==="gr"?"En qué se fue":"En qué rubros")+'</span></div>';
+  ord.forEach(function(k){
+    var p=tot?ms[k]/tot:0;
+    h+='<div class="ru"><i class="pt" style="background:var('+col+')"></i><span class="nm">'+esc(k)+'</span>'
+     + '<span class="vl num">'+esc(fmt(ms[k]))+'</span><span class="pc num">'+Math.round(p*100)+'%</span></div>'
+     + '<div class="tr"><i style="width:'+(p*100).toFixed(1)+'%;background:var('+col+')"></i></div>';
+  });
+  if(detTipo==="gr"){
+    var mp={},hay=0;
+    lista.forEach(function(x){var p=x.pago||"efectivo"; if(!mp[p])hay++; mp[p]=(mp[p]||0)+x.monto;});
+    if(hay>1){
+      h+='<div class="dt-sec"><span class="k">Cómo lo pagaste</span></div>';
+      PAGOS.forEach(function(p){
+        if(!mp[p.id])return;
+        var pc=tot?mp[p.id]/tot:0;
+        h+='<div class="ru"><i class="pt" style="background:var('+COLP[p.id]+')"></i><span class="nm">'+esc(p.n)+'</span>'
+         + '<span class="vl num">'+esc(fmt(mp[p.id]))+'</span><span class="pc num">'+Math.round(pc*100)+'%</span></div>'
+         + '<div class="tr"><i style="width:'+(pc*100).toFixed(1)+'%;background:var('+COLP[p.id]+')"></i></div>';
+      });
+    }
+  }
+  h+='<div class="dt-sec"><span class="k">Uno por uno</span></div><div class="dt-lista">';
+  lista.sort(function(a,b){return a.fecha<b.fecha?1:a.fecha>b.fecha?-1:(b.m||0)-(a.m||0);}).forEach(function(x){
+    var d=new Date(x.fecha+"T12:00:00");
+    var tit = detTipo==="gr" ? (x.sub||nomG(x.gr)) : (x.sub||nomG(x.gr));
+    var pg2 = detTipo==="gr" ? nomPago(x.pago||"efectivo").toLowerCase() : nomG(x.gr).toLowerCase();
+    var sub = DIAS[d.getDay()]+" "+d.getDate()+" · "+pg2+(x.nota?" · "+x.nota:"");
+    h+='<button class="dia" data-id="'+esc(x.id)+'"><i class="pt" style="background:var('+col+')"></i>'
+     + '<span class="b"><span class="n">'+esc(tit)+'</span><span class="s">'+esc(sub)+'</span></span>'
+     + '<span class="v num">−'+esc(fmt(x.monto))+'</span></button>';
+  });
+  h+='</div>';
+  $("rubCont").innerHTML=h;
+}
+$("rubX").addEventListener("click",function(){$("shRub").hidden=true;});
+$("shRub").addEventListener("click",function(e){if(e.target===this)this.hidden=true;});
+$("rubCont").addEventListener("click",function(e){
+  var d=e.target.closest(".dia[data-id]");
+  if(!d)return;
+  var x=null; D.mov.forEach(function(y){if(y.id===d.dataset.id)x=y;});
+  if(x){ $("shRub").hidden=true; abrirMov(x); }
+});
 
 function pLista(){
   var ab=planAbierto(), hechos=D.plan.filter(function(p){return p.hecho;});
@@ -494,6 +574,10 @@ $("cab").addEventListener("click",function(e){
 $("vista").addEventListener("click",function(e){
   var ir=e.target.closest("[data-ir]");
   if(ir){ vista=ir.dataset.ir; if(vista==="mov")filtro="gastos"; pintar(); window.scrollTo(0,0); return; }
+  var ru=e.target.closest("[data-ru]");
+  if(ru){ abrirDet("gr",ru.dataset.ru); return; }
+  var pgb=e.target.closest("[data-pg]");
+  if(pgb){ abrirDet("pago",pgb.dataset.pg); return; }
   var gr=e.target.closest("[data-gr]");
   if(gr){ vista="mov"; filtro="gastos"; pintar(); window.scrollTo(0,0); return; }
   if(e.target.closest("#bAho")){ abrirMov(null,"a"); return; }
@@ -823,7 +907,8 @@ function abrirCfg(){
 $("cfgX").addEventListener("click",function(){$("shCfg").hidden=true;});
 $("shCfg").addEventListener("click",function(e){if(e.target===this)this.hidden=true;});
 $("cfgOk").addEventListener("click",function(){
-  var c={user:$("cUser").value.trim(),repo:$("cRepo").value.trim(),tok:$("cTok").value.trim()};
+  var lim=function(s){return String(s==null?"":s).replace(/\s+/g,"");};
+  var c={user:lim($("cUser").value),repo:lim($("cRepo").value),tok:lim($("cTok").value)};
   if(!c.user||!c.repo||!c.tok){$("cfgMsg").innerHTML='<div class="aviso err" style="margin-top:12px">Completá los tres campos.</div>';return;}
   $("cfgOk").disabled=true;
   $("cfgMsg").innerHTML='<div class="aviso" style="margin-top:12px">Probando la conexión…</div>';
