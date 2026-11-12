@@ -479,6 +479,20 @@ function pintarDet(){
   h+='</div>';
   $("rubCont").innerHTML=h;
 }
+if(!document.getElementById("shRub")){
+  var _sh=document.createElement("div");
+  _sh.className="sheet"; _sh.id="shRub"; _sh.hidden=true;
+  _sh.innerHTML='<div class="sheet-in"><div class="grab"></div>'
+   + '<div class="sh"><button class="x" id="rubX">&#10005;</button><h2 id="rubTit">Rubro</h2></div>'
+   + '<div id="rubCont"></div></div>';
+  document.body.appendChild(_sh);
+  var _st=document.createElement("style");
+  _st.textContent=".dt-top{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:2px 0 14px;border-bottom:1px solid var(--hair);margin-bottom:4px}"
+   + ".dt-top .pt{margin-bottom:6px}"
+   + ".dt-v{font-family:var(--f-d);font-weight:700;font-size:27px;letter-spacing:-.02em;line-height:1.1}"
+   + ".dt-s{font-size:11.5px;color:var(--ink3)}.dt-sec{margin:16px 0 6px}.dt-lista{margin-top:2px}";
+  document.head.appendChild(_st);
+}
 $("rubX").addEventListener("click",function(){$("shRub").hidden=true;});
 $("shRub").addEventListener("click",function(e){if(e.target===this)this.hidden=true;});
 $("rubCont").addEventListener("click",function(e){
