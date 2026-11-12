@@ -40,7 +40,8 @@ var GRUPOS_INI=[
  {id:"g_otros", nombre:"Otros",     col:"--g8", pre:0, subs:["Imprevistos","Varios"]}
 ];
 var ING=["Salario","Aguinaldo","Venta","Otro"];
-var PAGOS=[{id:"efectivo",n:"Efectivo"},{id:"tarjeta",n:"Tarjeta"},{id:"transferencia",n:"Transferencia"}];
+var PAGOS=[{id:"efectivo",n:"Efectivo"},{id:"tarjeta",n:"Tarjeta"},{id:"transferencia",n:"Transferencia"},
+  {id:"fiado",n:"Fiado"}];
 var AHO=[{id:"Guardé",n:"Guardar plata"},{id:"Saqué",n:"Sacar del ahorro"}];
 
 var D=lee("miplata",null);
@@ -167,7 +168,7 @@ function porPago(ym){
     var p=x.pago||"efectivo";
     m[p]=(m[p]||0)+x.monto; tot+=x.monto;
   });
-  var cols={efectivo:"--g2",tarjeta:"--g1",transferencia:"--g6"};
+  var cols={efectivo:"--g2",tarjeta:"--g1",transferencia:"--g6",fiado:"--g3"};
   return PAGOS.map(function(p){
     return {id:p.id,nom:p.n,col:cols[p.id],gas:m[p.id]||0,pct:tot?(m[p.id]||0)/tot:0};
   }).filter(function(x){return x.gas>0;});
