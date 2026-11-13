@@ -10,6 +10,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mi Plata">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='30' fill='%23252529'/%3E%3Ctext x='60' y='84' font-family='Arial,sans-serif' font-size='74' font-weight='bold' fill='%231DBF79' text-anchor='middle'%3EG%3C/text%3E%3Crect x='50' y='34' width='4.5' height='56' fill='%23252529'/%3E%3Crect x='58' y='34' width='4.5' height='56' fill='%23252529'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap">
@@ -409,5 +411,6 @@ main{padding-block:12px 128px;display:flex;flex-direction:column;gap:11px}
 </div></div>
 
 <script src="app.js?v=7"></script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
 </body>
 </html>
