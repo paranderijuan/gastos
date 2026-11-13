@@ -25,6 +25,7 @@
   --ok:#16A366; --bad:#E5225A; --warn:#CC8800; --warn-bg:#FFF2D9;
   --g1:#268BFF; --g2:#1DBF79; --g3:#EB9C00; --g4:#FF739B;
   --g5:#E5225A; --g6:#8A73E5; --g7:#0059BF; --g8:#6C6C78;
+  --g9:#00A39B; --g10:#E5622A; --g11:#7A8C00; --g12:#B83DAD;
   --f-d:'Manrope','Segoe UI',system-ui,sans-serif;
   --f-b:'Inter',system-ui,-apple-system,sans-serif;
   color-scheme:light;
@@ -36,6 +37,7 @@
     --deep:#0E0E11; --deep2:#146542; --brand:#2BD98E; --mint:#7AF5C0; --on-brand:#0B2117;
     --ok:#2BD98E; --bad:#FF739B; --warn:#FFBF40; --warn-bg:#352B14;
     --g1:#66ADFF; --g2:#2BD98E; --g3:#FFBF40; --g5:#FA3E74; --g6:#A38CFF; --g7:#268BFF; --g8:#8A8A96;
+    --g9:#2BD9CE; --g10:#FF8A5C; --g11:#B5CC2E; --g12:#E066D6;
     color-scheme:dark;
   }
 }
@@ -45,6 +47,7 @@
   --deep:#0E0E11; --deep2:#146542; --brand:#2BD98E; --mint:#7AF5C0; --on-brand:#0B2117;
   --ok:#2BD98E; --bad:#FF739B; --warn:#FFBF40; --warn-bg:#352B14;
   --g1:#66ADFF; --g2:#2BD98E; --g3:#FFBF40; --g5:#FA3E74; --g6:#A38CFF; --g7:#268BFF; --g8:#8A8A96;
+  --g9:#2BD9CE; --g10:#FF8A5C; --g11:#B5CC2E; --g12:#E066D6;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -191,6 +194,11 @@ main{padding-block:12px 128px;display:flex;flex-direction:column;gap:11px}
 .cmp .v{font-family:var(--f-d);font-weight:700;font-size:12px;width:68px;text-align:right;flex:none}
 
 /* ajustes */
+.ptb{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;flex:none;
+  border:1px solid var(--hair);background:transparent}
+.cols{display:grid;grid-template-columns:repeat(6,1fr);gap:11px;padding:4px 2px 2px}
+.cols .col{aspect-ratio:1;border-radius:11px;border:none}
+.cols .col.on{box-shadow:0 0 0 2px var(--white),0 0 0 4px var(--ink)}
 .aj{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--hair)}
 .aj:last-child{border-bottom:none}
 .aj .nm{flex:1;min-width:0;font-weight:500;font-size:14px}
@@ -428,7 +436,7 @@ main{padding-block:12px 128px;display:flex;flex-direction:column;gap:11px}
   <button class="del" id="cfgOff" hidden>Desconectar</button>
 </div></div>
 
-<script src="app.js?v=9"></script>
+<script src="app.js?v=10"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
 </body>
 </html>

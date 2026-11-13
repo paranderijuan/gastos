@@ -1,6 +1,6 @@
 /* Mi Plata - para que ande sin internet y se pueda instalar */
-var V = "miplata-v9";
-var ARCH = ["./", "./index.html", "./app.js?v=9", "./manifest.json", "./icon-192.png", "./icon-512.png"];
+var V = "miplata-v10";
+var ARCH = ["./", "./index.html", "./app.js?v=10", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", function(e){
   e.waitUntil(caches.open(V).then(function(c){ return c.addAll(ARCH).catch(function(){}); })
     .then(function(){ return self.skipWaiting(); }));

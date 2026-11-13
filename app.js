@@ -569,9 +569,10 @@ function pAj(){
    + '<button class="btn-lin" id="cargarSal">Cargar en '+esc(MESES[+mes.split("-")[1]-1])+'</button></div>';
 
   h+='<div class="card"><div class="ch"><span class="k">Rubros y presupuesto</span></div>'
-   + '<div style="font-size:11.5px;color:var(--ink3);margin:-6px 0 8px">Tocá un rubro para cambiar lo que tiene adentro. Dejá en 0 si no querés tope.</div>';
+   + '<div style="font-size:11.5px;color:var(--ink3);margin:-6px 0 8px">Tocá el puntito para cambiarle el color, el nombre para renombrarlo y la flecha para ver lo que tiene adentro. Dejá el tope en 0 si no querés límite.</div>';
   D.grupos.forEach(function(g,i){
-    h+='<div class="aj"><i class="pt" style="background:var('+g.col+')"></i>'
+    h+='<div class="aj"><button class="ptb" data-col="'+i+'" aria-label="Color del rubro">'
+     + '<i class="pt" style="background:var('+g.col+')"></i></button>'
      + '<input type="text" value="'+esc(g.nombre)+'" data-n="'+i+'" aria-label="Nombre del rubro">'
      + '<input type="text" inputmode="numeric" class="mon-in num" value="'+esc(fmt(g.pre||0))+'" data-p="'+i+'" aria-label="Presupuesto">'
      + '<button class="x" data-sub="'+esc(g.id)+'" aria-label="Ver lo que tiene adentro">›</button></div>';
@@ -633,9 +634,11 @@ $("vista").addEventListener("click",function(e){
   }
   /* ajustes */
   if(e.target.closest("#addGr")){
-    D.grupos=D.grupos.concat([{id:uid(),nombre:"Nuevo rubro",col:"--g8",pre:0,subs:["Varios"]}]);
+    D.grupos=D.grupos.concat([{id:uid(),nombre:"Nuevo rubro",col:colorLibre(),pre:0,subs:["Varios"]}]);
     guardar(); pintar(); return;
   }
+  var cb=e.target.closest("[data-col]");
+  if(cb){ abrirColor(+cb.dataset.col); return; }
   if(e.target.closest("#cargarSal")){ cargarSalario(); return; }
   if(e.target.closest("#btnCfg")){ abrirCfg(); return; }
   if(e.target.closest("#btnAhora")){ sincronizar(true); return; }
@@ -836,6 +839,23 @@ $("optLista").addEventListener("click",function(e){
   var b=e.target.closest("[data-o]"); if(!b)return;
   $("shOpt").hidden=true; if(optCb)optCb(b.dataset.o);
 });
+var COLORES=["--g1","--g2","--g3","--g4","--g5","--g6","--g7","--g9","--g10","--g11","--g12","--g8"];
+function colorLibre(){
+  var usados={}; D.grupos.forEach(function(g){usados[g.col]=1;});
+  for(var i=0;i<COLORES.length;i++) if(!usados[COLORES[i]]) return COLORES[i];
+  return "--g8";
+}
+function abrirColor(i){
+  var g=D.grupos[i]; if(!g)return;
+  $("optTit").textContent="Color de "+g.nombre;
+  var h='<div class="cols">';
+  COLORES.forEach(function(c){
+    h+='<button class="col'+(g.col===c?" on":"")+'" data-o="'+c+'" style="background:var('+c+')" aria-label="Elegir color"></button>';
+  });
+  $("optLista").innerHTML=h+'</div>';
+  optCb=function(v){ D.grupos[i].col=v; guardar(); pintar(); };
+  $("shOpt").hidden=false;
+}
 $("optX").addEventListener("click",function(){$("shOpt").hidden=true;});
 $("shOpt").addEventListener("click",function(e){if(e.target===this)this.hidden=true;});
 $("rwPago").addEventListener("click",function(){
