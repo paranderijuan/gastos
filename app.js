@@ -524,19 +524,28 @@ function pLista(){
         if(!porGr[k]){ porGr[k]=[]; orden.push(k); }
         porGr[k].push(p);
       });
+      var sinPrecio=0, prim=true;
       h+='<div class="card"><div class="ch"><span class="k">Falta comprar</span></div>';
       orden.forEach(function(k){
         var lista=porGr[k]; if(!lista||!lista.length)return;
         var col = k==="_otros" ? "var(--g8)" : colG(k);
-        h+='<div class="lsec"><i class="pt" style="background:'+col+'"></i>'
-         + '<span class="nm">'+esc(k==="_otros"?"Sin rubro":nomG(k))+'</span></div>';
+        var sub=0; lista.forEach(function(p){ sub+=p.monto||0; if(!p.monto)sinPrecio++; });
+        h+='<div class="lsec'+(prim?" p1":"")+'"><i class="pt" style="background:'+col+'"></i>'
+         + '<span class="nm">'+esc(k==="_otros"?"Sin rubro":nomG(k))+'</span>'
+         + '<span class="tt num">'+(sub?esc(fmt(sub)):"")+'</span></div>';
+        prim=false;
         lista.forEach(function(p){
           h+='<div class="lst"><button class="bx" data-ok="'+esc(p.id)+'" aria-label="Marcar como comprado"></button>'
            + '<button class="b" data-ed="'+esc(p.id)+'" style="text-align:left"><span class="n">'+esc(p.titulo)+'</span></button>'
-           + (p.monto?'<span class="v num">'+esc(fmt(p.monto))+'</span>':'')+'</div>';
+           + '<button class="v num'+(p.monto?"":" sp")+'" data-ed="'+esc(p.id)+'">'
+           + (p.monto?esc(fmt(p.monto)):"poner precio")+'</button></div>';
         });
       });
       h+='</div>';
+      h+='<div class="card plan"><div class="ch"><span class="k">Vas a necesitar</span></div>'
+       + '<div class="pl-v num">'+esc(gs(tot))+'</div><div class="pl-s">'
+       + (sinPrecio? 'Te falta ponerle precio a '+sinPrecio+(sinPrecio>1?' cosas. ':' cosa. '):'')
+       + 'Esto <b>no se descuenta</b> de tu plata: es para que sepas cuánto preparar.</div></div>';
     }
     if(hechos.length){
       h+='<div class="card"><div class="ch"><span class="k">Ya comprado</span>'
