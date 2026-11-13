@@ -506,7 +506,7 @@ function pLista(){
   var ab=planAbierto(), hechos=D.plan.filter(function(p){return p.hecho;});
   var tot=0; ab.forEach(function(x){tot+=x.monto||0;});
   $("cab").innerHTML='<div class="hdr wrap"><h1>Lista del mes</h1><div class="segs">'
-   + '<button aria-pressed="true">'+ab.length+' sin comprar · '+esc(fmt(tot))+'</button>'
+   + '<button aria-pressed="true">'+ab.length+' sin comprar'+(tot?' · '+esc(fmt(tot)):'')+'</button>'
    + (hechos.length?'<button>'+hechos.length+' comprado'+(hechos.length>1?"s":"")+'</button>':'')
    + '</div></div>';
   var h="";
@@ -516,12 +516,25 @@ function pLista(){
      + 'Cuando lo comprás, tildás y pasa solo a los gastos.</div></div>';
   }else{
     if(ab.length){
-      h+='<div class="card"><div class="ch"><span class="k">Falta comprar</span></div>';
+      /* agrupado por rubro, en el orden de los rubros */
+      var porGr={}, orden=[];
+      D.grupos.forEach(function(g){ porGr[g.id]=[]; orden.push(g.id); });
       ab.forEach(function(p){
-        h+='<div class="lst"><button class="bx" data-ok="'+esc(p.id)+'" aria-label="Marcar como comprado"></button>'
-         + '<button class="b" data-ed="'+esc(p.id)+'" style="text-align:left"><span class="n">'+esc(p.titulo)+'</span>'
-         + '<span class="s">'+esc(nomG(p.gr))+'</span></button>'
-         + '<span class="v num">'+esc(fmt(p.monto))+'</span></div>';
+        var k=porGr[p.gr]?p.gr:"_otros";
+        if(!porGr[k]){ porGr[k]=[]; orden.push(k); }
+        porGr[k].push(p);
+      });
+      h+='<div class="card"><div class="ch"><span class="k">Falta comprar</span></div>';
+      orden.forEach(function(k){
+        var lista=porGr[k]; if(!lista||!lista.length)return;
+        var col = k==="_otros" ? "var(--g8)" : colG(k);
+        h+='<div class="lsec"><i class="pt" style="background:'+col+'"></i>'
+         + '<span class="nm">'+esc(k==="_otros"?"Sin rubro":nomG(k))+'</span></div>';
+        lista.forEach(function(p){
+          h+='<div class="lst"><button class="bx" data-ok="'+esc(p.id)+'" aria-label="Marcar como comprado"></button>'
+           + '<button class="b" data-ed="'+esc(p.id)+'" style="text-align:left"><span class="n">'+esc(p.titulo)+'</span></button>'
+           + (p.monto?'<span class="v num">'+esc(fmt(p.monto))+'</span>':'')+'</div>';
+        });
       });
       h+='</div>';
     }
@@ -531,7 +544,7 @@ function pLista(){
       hechos.slice(-15).reverse().forEach(function(p){
         h+='<div class="lst done"><span class="bx on">✓</span>'
          + '<span class="b"><span class="n">'+esc(p.titulo)+'</span><span class="s">'+esc(nomG(p.gr))+' · pasó a gastos</span></span>'
-         + '<span class="v num">'+esc(fmt(p.monto))+'</span></div>';
+         + (p.monto?'<span class="v num">'+esc(fmt(p.monto))+'</span>':'')+'</div>';
       });
       h+='</div>';
     }
@@ -651,9 +664,19 @@ function cargarSalario(){
     gr:"",sub:"Salario",pago:"",nota:"",m:Date.now()});
   guardar(); vista="inicio"; pintar(); toast("Salario cargado");
 }
+var planPend=null;
 function comprar(id){
   var p=null; D.plan.forEach(function(x){if(x.id===id)p=x;});
   if(!p)return;
+  if(!p.monto){
+    /* sin precio anotado: que ponga cuánto salió de verdad */
+    planPend=p.id;
+    abrirMov(null,"g");
+    M.gr=p.gr; M.sub=p.titulo;
+    pintarMovHoja();
+    toast("¿Cuánto salió?");
+    return;
+  }
   p.hecho=1; p.m=Date.now();
   D.mov.push({id:uid(),t:"g",fecha:hoyISO(),monto:p.monto,gr:p.gr,sub:p.titulo,pago:"efectivo",nota:"",m:Date.now()});
   guardar(); pintar(); toast("Pasó a gastos");
@@ -716,7 +739,7 @@ $("fMonto").addEventListener("input",function(){
 });
 $("movX").addEventListener("click",cerrarMov);
 $("shMov").addEventListener("click",function(e){if(e.target===this)cerrarMov();});
-function cerrarMov(){ $("shMov").hidden=true; }
+function cerrarMov(){ $("shMov").hidden=true; planPend=null; }
 $("movSave").addEventListener("click",function(){
   if($("movSave").disabled)return;
   var c={t:M.t,fecha:M.fecha,monto:M.monto,gr:M.t==="g"?M.gr:"",sub:M.sub||"",
@@ -724,8 +747,13 @@ $("movSave").addEventListener("click",function(){
   if(M.id){ for(var i=0;i<D.mov.length;i++) if(D.mov[i].id===M.id){c.id=M.id;D.mov[i]=c;break;} }
   else { c.id=uid(); D.mov.push(c); }
   mes=ymDe(c.fecha);
+  var vinoDeLista=false;
+  if(planPend){
+    D.plan.forEach(function(p){ if(p.id===planPend){ p.hecho=1; p.monto=c.monto; p.m=Date.now(); vinoDeLista=true; } });
+    planPend=null;
+  }
   guardar(); cerrarMov(); pintar();
-  toast(M.t==="i"?"Ingreso guardado":M.t==="a"?"Listo":"Gasto guardado");
+  toast(vinoDeLista?"Pasó a gastos":M.t==="i"?"Ingreso guardado":M.t==="a"?"Listo":"Gasto guardado");
 });
 $("movDel").addEventListener("click",function(){
   if(!confDel){ confDel=true; this.textContent="Tocá otra vez para eliminar"; this.classList.add("on"); return; }
@@ -865,7 +893,12 @@ $("iQue").addEventListener("input",pintarItem);
 $("iMonto").addEventListener("input",function(){
   var d=soloDig(this.value); this.value=d?fmt(parseInt(d,10)):""; IT.monto=parseInt(d,10)||0;
 });
-$("iCat").addEventListener("click",function(){ catDestino="item"; catAbierto=null; $("catTit").textContent="Rubro"; pintarCat(); $("shCat").hidden=false; });
+$("iCat").addEventListener("click",function(){
+  catDestino="item"; catAbierto=null; $("catTit").textContent="Rubro"; pintarCat();
+  /* la hoja de rubros va en el HTML antes que la de anotar: sin esto queda abajo y no se puede tocar */
+  $("shCat").style.zIndex="46"; $("shOpt").style.zIndex="46";
+  $("shCat").hidden=false;
+});
 $("itemX").addEventListener("click",function(){$("shItem").hidden=true;});
 $("shItem").addEventListener("click",function(e){if(e.target===this)this.hidden=true;});
 $("itemSave").addEventListener("click",function(){

@@ -249,6 +249,15 @@ main{padding-block:12px 128px;display:flex;flex-direction:column;gap:11px}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rw .vv.off{color:var(--ink3);font-weight:400}
 .rw .cv{color:var(--ink3);font-size:16px;flex:none}
+.rw .gs{font-style:normal;color:var(--ink3);font-size:12.5px;flex:none}
+.in-lin{flex:1;min-width:0;background:transparent;border:none;font:inherit;font-weight:700;
+  color:var(--ink);padding:0}
+.in-lin:focus{outline:none}
+.in-lin::placeholder{color:var(--ink3);font-weight:400}
+.lsec{display:flex;align-items:center;gap:8px;margin:14px 0 2px}
+.lsec:first-child{margin-top:0}
+.lsec .nm{font-family:var(--f-d);font-weight:700;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink3)}
 .save{margin-top:18px;text-align:center;padding:15px;border-radius:14px;background:var(--brand);color:var(--on-brand);
   font-family:var(--f-d);font-weight:700;font-size:15px;width:100%}
 .save[disabled]{opacity:.38}
@@ -383,9 +392,10 @@ main{padding-block:12px 128px;display:flex;flex-direction:column;gap:11px}
   <div style="padding-bottom:4px"><span class="k">Qué hay que comprar</span>
     <input id="iQue" type="text" maxlength="60" placeholder="Ej: cubiertas del auto" autocomplete="off"
       style="width:100%;margin-top:8px;background:var(--soft);border:1px solid var(--hair);border-radius:11px;padding:13px"></div>
-  <div class="amt" style="padding:20px 0 16px"><div class="v"><em>Gs.</em><input id="iMonto" type="text" inputmode="numeric" placeholder="0" size="7" autocomplete="off"></div></div>
-  <div class="rows">
+  <div class="rows" style="margin-top:14px">
     <button class="rw" id="iCat"><span class="kk">Rubro</span><span class="vv off" id="iCatV">elegir</span><span class="cv">›</span></button>
+    <div class="rw"><span class="kk">Precio</span>
+      <span class="vv"><em class="gs">Gs.</em><input id="iMonto" class="num in-lin" type="text" inputmode="numeric" placeholder="si ya lo sabés" autocomplete="off"></span></div>
   </div>
   <button class="save" id="itemSave">Guardar</button>
   <button class="del" id="itemDel" hidden>Eliminar</button>
@@ -410,7 +420,7 @@ main{padding-block:12px 128px;display:flex;flex-direction:column;gap:11px}
   <button class="del" id="cfgOff" hidden>Desconectar</button>
 </div></div>
 
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
 </body>
 </html>
